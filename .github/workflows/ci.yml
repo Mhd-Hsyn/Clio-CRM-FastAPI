@@ -1,0 +1,47 @@
+name: CI Pipeline
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Create .env file
+      run: |
+        sudo sh -c 'echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env'
+        sudo sh -c 'echo "USER_JWT_TOKEN_KEY=${{ secrets.USER_JWT_TOKEN_KEY }}" >> .env'
+        sudo sh -c 'echo "ADMIN_JWT_TOKEN_KEY=${{ secrets.ADMIN_JWT_TOKEN_KEY }}" >> .env'
+        sudo sh -c 'echo "DEBUG=${{ secrets.DEBUG }}" >> .env'
+
+        sudo sh -c 'echo "MONGO_USER=${{ secrets.MONGO_USER }}" >> .env'
+        sudo sh -c 'echo "MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}" >> .env'
+        sudo sh -c 'echo "MONGO_DB=${{ secrets.MONGO_DB }}" >> .env'
+        sudo sh -c 'echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env'
+
+        sudo sh -c 'echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env'
+        sudo sh -c 'echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env'
+        sudo sh -c 'echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env'
+        sudo sh -c 'echo "REDIS_OTP_DB=${{ secrets.REDIS_OTP_DB }}" >> .env'
+        sudo sh -c 'echo "REDIS_RATE_LIMIT_DB=${{ secrets.REDIS_RATE_LIMIT_DB }}" >> .env'
+
+        sudo sh -c 'echo "RABBITMQ_HOST=${{ secrets.RABBITMQ_HOST }}" >> .env'
+        sudo sh -c 'echo "RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }}" >> .env'
+        sudo sh -c 'echo "RABBITMQ_USER=${{ secrets.RABBITMQ_USER }}" >> .env'
+        sudo sh -c 'echo "RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}" >> .env'
+        sudo sh -c 'echo "RABBITMQ_EMAIL_SENDING_QUEUE=${{ secrets.RABBITMQ_EMAIL_SENDING_QUEUE }}" >> .env'
+        sudo sh -c 'echo "RABBITMQ_EMAIL_SENDING_EXCHANGE=${{ secrets.RABBITMQ_EMAIL_SENDING_EXCHANGE }}" >> .env'
+        sudo sh -c 'echo "RABBITMQ_EMAIL_SENDING_ROUTING_KEY=${{ secrets.RABBITMQ_EMAIL_SENDING_ROUTING_KEY }}" >> .env'
+
+        sudo sh -c 'echo "OTP_FERNET_KEY=${{ secrets.OTP_FERNET_KEY }}" >> .env'
+        sudo sh -c 'echo "RETELL_API_KEY=${{ secrets.RETELL_API_KEY }}" >> .env'
+
+    - name: Build and Run Docker compose
+      run: |
+        sudo docker compose down
+        sudo docker compose up --build -d
