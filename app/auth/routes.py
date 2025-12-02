@@ -104,23 +104,8 @@ async def register_as_client(
 
     if profile_image:
         await user.save_file("profile_image", profile_image, delete_old=False, db=db)
-    # Save profile image if provided
-    # if profile_image:
-        # FileHandlerMixin handles storage + db update
-        # file_handler: FileHandlerMixin = user
-        # import asyncio
-        # asyncio.run(file_handler.save_file(
-        #     "profile_image",
-        #     profile_image,
-        #     delete_old=False,
-        #     db=db
-        # ))
 
-    # token_data = await auth_service.generate_jwt_payload(user, request)
-    token_data = {
-        "access_token": "access_token",
-        "refresh_token": "refresh_token",   
-    }
+    token_data = await auth_service.generate_jwt_payload(user=user, request=request, db=db)
 
     user_data = UserProfileResponse.model_validate(user)
     user_data = user_data.model_copy(update={
