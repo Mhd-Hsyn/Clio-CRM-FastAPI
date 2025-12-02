@@ -1,9 +1,13 @@
 from passlib.hash import pbkdf2_sha256
+from sqlalchemy.orm import validates
 from app.core.constants.choices import UserRoleChoices, UserAccountStatusChoices
 
 class PasswordMixin:
-    def set_password(self, raw_password: str):
-        self.password = pbkdf2_sha256.hash(raw_password)
+    @validates("password")
+    def hash_password(self, key, value):
+        if value:
+            return pbkdf2_sha256.hash(value)
+        return value
 
     def check_password(self, raw_password: str) -> bool:
         return pbkdf2_sha256.verify(raw_password, self.password)

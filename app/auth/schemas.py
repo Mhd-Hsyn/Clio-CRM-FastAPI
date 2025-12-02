@@ -91,9 +91,9 @@ class UserProfileResponse(BaseModel):
     email: EmailStr
     mobile_number: Optional[str] = None
     profile_image: str
-    role: str
+    role: int
     role_name: str
-    account_status: str
+    account_status: int
     account_status_name: str
     is_active: bool
     is_staff: bool
