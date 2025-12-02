@@ -57,52 +57,27 @@ async def save_file_for_field(
     allowed_exts: Optional[set] = None,
     max_size: Optional[int] = None,
 ) -> Optional[str]:
-    """
-    Save a file according to field's upload_to metadata.
-    Returns new storage path.
-    """
     if not file:
         return None
 
-    # Extract `upload_to` from Pydantic metadata
-    upload_to = None
-    try:
-        field_info = instance.__class__.model_fields.get(field_name)
-        if field_info:
-            # metadata could be tuple or dict, handle both
-            metadata = {}
-            if isinstance(field_info.metadata, dict):
-                metadata = field_info.metadata
-            elif isinstance(field_info.metadata, (list, tuple)):
-                # Convert sequence of metadata key-value pairs into dict
-                for m in field_info.metadata:
-                    if isinstance(m, dict):
-                        metadata.update(m)
-
-            upload_to = metadata.get("upload_to")
-    except Exception:
-        pass
-
-    # Fallback: try explicit mapping on model
-    if not upload_to:
-        upload_to = getattr(instance.__class__, "__file_fields__", {}).get(field_name)
+    # SQLAlchemy: get upload_to from Column.info or fallback mapping
+    upload_to = getattr(instance.__class__, "__file_fields__", {}).get(field_name)
+    if not upload_to and hasattr(instance.__class__, "__table__"):
+        col = instance.__class__.__table__.columns.get(field_name)
+        if col is not None:
+            upload_to = col.info.get("upload_to")
 
     if not upload_to:
         raise AppException(
             f"Missing `upload_to` metadata for field '{field_name}' in model '{instance.__class__.__name__}'."
         )
 
-    if not upload_to:
-        raise AppException(
-            f"Missing `upload_to` metadata for field '{field_name}' "
-            f"in model '{instance.__class__.__name__}'."
-        )
-
     allowed_exts = allowed_exts or ALLOWED_FILE_EXTS
     max_size = max_size or MAX_UPLOAD_SIZE
     await _validate_file(file, allowed_exts, max_size)
 
-    # Path is built *only* from metadata rule
     path = _resolve_upload_path(upload_to, instance, file.filename)
     await storage.save(path, file)
     return path
+
+

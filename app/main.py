@@ -1,15 +1,15 @@
 import uvicorn
 
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+# from fastapi.staticfiles import StaticFiles
 
-from app.config.settings import MEDIA_DIR
+# from app.config.settings import MEDIA_DIR
 from app.config.logger import get_logger
-from app.config.routers import include_all_routers
+# from app.config.routers import include_all_routers
 from app.config.lifespan import lifespan
-from app.config.cors import setup_cors
-from app.config.middleware import setup_middlewares
-from app.config.exceptions import setup_exceptions
+# from app.config.cors import setup_cors
+# from app.config.middleware import setup_middlewares
+# from app.config.exceptions import setup_exceptions
 
 
 logger = get_logger("main")
@@ -24,12 +24,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-include_all_routers(app)
-setup_cors(app)
-setup_exceptions(app)
-setup_middlewares(app)
+# include_all_routers(app)
+# setup_cors(app)
+# setup_exceptions(app)
+# setup_middlewares(app)
 
-app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
+# app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 
 

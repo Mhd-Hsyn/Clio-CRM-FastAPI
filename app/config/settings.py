@@ -58,7 +58,8 @@ class Settings(BaseSettings):
     @property
     def sqlalchemy_database_uri(self) -> str:
         password = quote_plus(self.db_password)
-        url= f"postgresql+asyncpg://{self.db_user}:{password}@{self.db_host}:{self.db_port}/{self.db_name}"
+        # url= f"postgresql+asyncpg://{self.db_user}:{password}@{self.db_host}:{self.db_port}/{self.db_name}"
+        url= f"postgresql+psycopg2://{self.db_user}:{password}@{self.db_host}:{self.db_port}/{self.db_name}"
         return url
 
 

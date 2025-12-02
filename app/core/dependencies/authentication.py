@@ -1,6 +1,4 @@
 from fastapi import Request, HTTPException, status, Depends
-from beanie.odm.fields import Link
-from beanie.exceptions import DocumentNotFound
 from app.auth.services.jwt_handler import JWTHandler
 from app.auth.utils.auth_utils import AuthUtils
 from app.core.utils.helpers import generate_fingerprint
