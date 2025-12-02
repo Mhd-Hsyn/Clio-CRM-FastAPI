@@ -40,7 +40,8 @@ class Settings(BaseSettings):
     BACKEND_API_BASE_URL: str = "https://ai-call-assistant-api.devssh.xyz"
 
     # Storage settings
-    STORAGE_BACKEND: str = "local"  # Default local storage
+    # STORAGE_BACKEND: str = "local"  # Default local storage
+    STORAGE_BACKEND: str = "s3"  # Default local storage
     LOCAL_MEDIA_PATH: str = "media/"  # Default path
 
     # AWS S3 (optional)
