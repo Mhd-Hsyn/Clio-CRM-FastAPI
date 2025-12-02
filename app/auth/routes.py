@@ -1,4 +1,5 @@
 from datetime import datetime
+import asyncio
 from fastapi import (
     APIRouter, 
     Request, 
@@ -120,55 +121,54 @@ async def register_as_client(
     )
 
 
-# @auth_router.post(
-#     path="/login",
-#     response_model=AuthResponseData,
-#     status_code=status.HTTP_200_OK
-# )
-# async def login(
-#     request: Request, 
-#     payload: UserLoginSchema = Body(...)
-# ):
-#     email = payload.email.lower().strip()
-#     password = payload.password
+@auth_router.post(
+    path="/login",
+    response_model=AuthResponseData,
+    status_code=status.HTTP_200_OK
+)
+async def login(
+    request: Request, 
+    payload: UserLoginSchema = Body(...),
+    db: Session = Depends(get_db)
+):
+    email = payload.email.lower().strip()
+    password = payload.password
 
-#     # Fetch user from DB
-#     user_instance = await UserModel.find_one(UserModel.email == email)
-#     if not user_instance:
-#         raise AppException("User with this email does not exist")
+    # Fetch user from DB
+    user_instance = db.query(UserModel).filter(UserModel.email == email).first()
+    if not user_instance:
+        raise AppException("User with this email does not exist")
 
-#     # Verify password
-#     if not user_instance.check_password(password):
-#         raise AppException("Incorrect password")
+    # Verify password
+    if not user_instance.check_password(password):
+        raise AppException("Incorrect password")
 
-#     # Check if user is active
-#     if user_instance.account_status != UserAccountStatusChoices.ACTIVE:
-#         raise AppException("This account is disabled. Please contact support")
+    # Check if user is active
+    if user_instance.account_status != UserAccountStatusChoices.ACTIVE:
+        raise AppException("This account is disabled. Please contact support")
 
-#     # Generate JWT tokens
-#     token_data = await auth_service.generate_jwt_payload(
-#         user=user_instance,
-#         request=request,
-#         access_token_duration={"days": 1},
-#         refresh_token_duration={"days": 7}
-#     )
+    # Generate JWT tokens (sync)
+    token_data = await auth_service.generate_jwt_payload(
+        user=user_instance,
+        request=request,
+        db=db,
+        access_token_duration={"days": 1},
+        refresh_token_duration={"days": 7}
+    )
 
-#     if not token_data["status"]:
-#         raise InternalServerErrorException(token_data["message"])
+    # Serialize user data
+    user_data = UserProfileResponse.model_validate(user_instance)
+    user_data = user_data.model_copy(update={
+        "profile_image": await user_instance.profile_image_url()
+    })
 
-#     # Serialize user data
-#     user_data = UserProfileResponse.model_validate(user_instance)
-#     user_data = user_data.model_copy(update={
-#         "profile_image": await user_instance.profile_image_url
-#     })
-
-#     return AuthResponseData(
-#         status=True,
-#         message="Login Successfully",
-#         access_token=token_data["access_token"],
-#         refresh_token=token_data["refresh_token"],
-#         data=user_data
-#     )
+    return AuthResponseData(
+        status=True,
+        message="Login Successfully",
+        access_token=token_data["access_token"],
+        refresh_token=token_data["refresh_token"],
+        data=user_data
+    )
 
 
 # @auth_router.get(
